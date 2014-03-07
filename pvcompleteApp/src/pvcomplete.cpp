@@ -157,6 +157,7 @@ static int pvcomplete(int disable)
 #ifndef _WIN32
 		rl_bind_key ('\t', rl_insert);
 #endif
+    }
 	else
 	{
 		dump_pvs(NULL, NULL, the_pvs);

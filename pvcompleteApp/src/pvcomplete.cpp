@@ -35,11 +35,11 @@
 #ifdef _WIN32
 #include <process.h>
 #include <windows.h>
+#include <editline/readline.h>
 #else
 #include <unistd.h>
-#endif
-
-#include <editline/readline.h>
+#include <readline/readline.h>
+#endif /* _WIN32 */
 
 #include <epicsExport.h>
 

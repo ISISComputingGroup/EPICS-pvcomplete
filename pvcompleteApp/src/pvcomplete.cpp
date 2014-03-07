@@ -154,12 +154,17 @@ static int pvcomplete(int disable)
 	{
 		printf("pvcomplete: disabling pv command line completion\n");
 	    rl_attempted_completion_function = NULL;
-	}
+#ifndef _WIN32
+		rl_bind_key ('\t', rl_insert);
+#endif
 	else
 	{
 		dump_pvs(NULL, NULL, the_pvs);
 		printf("pvcomplete: loaded %d pvs for command line completion\n", the_pvs.size());
 	    rl_attempted_completion_function = pv_completion_function;
+#ifndef _WIN32
+		rl_bind_key ('\t', rl_complete);
+#endif
 	}
     return 0;
 }

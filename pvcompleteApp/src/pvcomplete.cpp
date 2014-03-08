@@ -29,6 +29,7 @@
 #include <iocsh.h>
 #include "macLib.h"
 #include "epicsExit.h"
+#include "initHooks.h"
 
 #include "utilities.h"
 
@@ -51,7 +52,7 @@ static void dump_pvs(const char *precordTypename, const char *fields, std::vecto
 {
     DBENTRY dbentry;
     DBENTRY *pdbentry=&dbentry;
-    long status, status2;
+    long status;
     int nfields = 0;
     int ifield;
     char *fieldnames = 0;
@@ -114,7 +115,8 @@ static void dump_pvs(const char *precordTypename, const char *fields, std::vecto
 
 static char* pv_complete_generator(const char* text, int state)
 {
-    static int list_index = 0, len = 0;
+    static int list_index = 0;
+    size_t len = 0;
     const char *name;
 
     /* If this is a new word to complete, initialize now.  This includes
@@ -154,6 +156,7 @@ static int pvcomplete(int disable)
 	{
 		printf("pvcomplete: disabling pv command line completion\n");
 	    rl_attempted_completion_function = NULL;
+		// WinEditLine does not support rl_bind_key()
 #ifndef _WIN32
 		rl_bind_key ('\t', rl_insert);
 #endif
@@ -161,8 +164,9 @@ static int pvcomplete(int disable)
 	else
 	{
 		dump_pvs(NULL, NULL, the_pvs);
-		printf("pvcomplete: loaded %d pvs for command line completion\n", the_pvs.size());
+		printf("pvcomplete: loaded %lu pvs for command line completion\n", the_pvs.size());
 	    rl_attempted_completion_function = pv_completion_function;
+		// WinEditLine does not support rl_bind_key()
 #ifndef _WIN32
 		rl_bind_key ('\t', rl_complete);
 #endif
@@ -183,12 +187,26 @@ static void initCallFunc(const iocshArgBuf *args)
     pvcomplete(args[0].ival);
 }
 
+static void myHookFunction(initHookState state)
+{
+    switch(state) 
+    {
+        case initHookAfterIocRunning:
+            pvcomplete(0);
+            break;
+
+        default:
+            break;
+    }
+}
+
 extern "C" 
 {
 
 static void pvcompleteRegister(void)
 {
     iocshRegister(&initFuncDef, initCallFunc);
+    initHookRegister(myHookFunction);
 }
 
 epicsExportRegistrar(pvcompleteRegister);

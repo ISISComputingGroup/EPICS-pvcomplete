@@ -16,7 +16,11 @@ LIBRARY_IOC += pvcomplete
 DBD += pvcomplete.dbd
 
 # specify all source files to be compiled and added to the library
+ifeq ($(COMMANDLINE_LIBRARY),EPICS)
+pvcomplete_SRCS += pvcomplete_dummy.cpp
+else
 pvcomplete_SRCS += pvcomplete.cpp
+endif
 
 pvcomplete_LIBS += $(EPICS_BASE_IOC_LIBS)
 
